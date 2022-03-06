@@ -1,0 +1,60 @@
+{
+    "name": "datenanfragen-desktop-app",
+    "version": "1.0.0",
+    "private": true,
+    "description": "An Electron-based desktop app for Datenanfragen.de",
+    "author": "The Datenanfragen.de project <dev@datenanfragen.de> (https://www.datenanfragen.de)",
+    "contributors": [
+        {
+            "name": "Benjamin Altpeter",
+            "email": "hi@bn.al",
+            "url": "https://benjamin-altpeter.de"
+        },
+        {
+            "name": "Lorenz Sieben",
+            "email": "me@lorenz-sieben.com",
+            "url": "https://lorenz-sieben.com"
+        }
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/datenanfragen/desktop-app.git"
+    },
+    "bugs": {
+        "url": "https://github.com/datenanfragen/desktop-app/issues"
+    },
+    "scripts": {
+        "build": "tsc",
+        "watch": "tsc -w",
+        "lint": "eslint -c .eslintrc --ext .ts ./src",
+        "start": "yarn build && electron ./dist/main.js"
+    },
+    "dependencies": {},
+    "devDependencies": {
+        "@types/node": "^17.0.21",
+        "@typescript-eslint/eslint-plugin": "^5.13.0",
+        "@typescript-eslint/parser": "^5.13.0",
+        "electron": "^17.1.0",
+        "eslint": "^8.10.0",
+        "eslint-config-prettier": "^8.5.0",
+        "eslint-plugin-eslint-comments": "^3.2.0",
+        "eslint-plugin-import": "^2.25.4",
+        "husky": "4.3.7",
+        "lint-staged": "^12.3.5",
+        "prettier": "^2.5.1",
+        "typescript": "^4.6.2"
+    },
+    "husky": {
+        "hooks": {
+            "pre-commit": "lint-staged"
+        }
+    },
+    "lint-staged": {
+        "*.{ts,js,scss,json}": [
+            "prettier --write"
+        ],
+        "*.{ts,js}": [
+            "eslint --fix"
+        ]
+    }
+}
