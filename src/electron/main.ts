@@ -7,7 +7,7 @@ const createWindow = () => {
         height: 600,
     });
 
-    win.loadFile(join(__dirname, '..', 'src', 'index.html'));
+    win.loadFile(join(__dirname, '..', 'app', 'index.html'));
 };
 
 app.enableSandbox();
