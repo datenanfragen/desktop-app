@@ -27,7 +27,8 @@
         "build:app": "parcel build src/app/index.html --dist-dir dist/app --no-optimize --public-url .",
         "build:electron": "tsc",
         "start": "yarn build:app && yarn build:electron && electron ./dist/electron/main.js",
-        "lint": "eslint -c .eslintrc --ext .ts ./src"
+        "lint": "eslint -c .eslintrc --ext .ts ./src",
+        "typecheck": "tsc --noEmit && yarn tsc --noEmit -p src/app/tsconfig.json"
     },
     "dependencies": {
         "preact": "^10.6.6"
@@ -56,14 +57,14 @@
     },
     "husky": {
         "hooks": {
-            "pre-commit": "lint-staged"
+            "pre-commit": "yarn lint-staged && yarn typecheck"
         }
     },
     "lint-staged": {
-        "*.{ts,js,scss,json}": [
+        "*.{ts,js,tsx,jsx,scss,json}": [
             "prettier --write"
         ],
-        "*.{ts,js}": [
+        "*.{ts,js,tsx,jsx}": [
             "eslint --fix"
         ]
     }
