@@ -1,5 +1,13 @@
 import { app, BrowserWindow, session } from 'electron';
 import { join } from 'path';
+import electronReloader from 'electron-reloader';
+
+try {
+    electronReloader(module, {
+        ignore: [/src\/.+/],
+        watchRenderer: false, // We are using Parcel's HMR.
+    });
+} catch {}
 
 const createWindow = () => {
     const win = new BrowserWindow({
@@ -22,7 +30,12 @@ app.whenReady().then(() => {
         callback({
             responseHeaders: {
                 ...details.responseHeaders,
-                'Content-Security-Policy': ["default-src 'self'; script-src 'self'"],
+                'Content-Security-Policy': [
+                    app.isPackaged
+                        ? "default-src 'self'; script-src 'self'"
+                        : // Parcel uses `ws://localhost:1234` for HMR.
+                          "default-src 'self'; script-src 'self'; connect-src 'self' ws://localhost:1234",
+                ],
             },
         });
     });

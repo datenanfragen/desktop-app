@@ -26,7 +26,11 @@
     "scripts": {
         "build:app": "parcel build src/app/index.html --dist-dir dist/app --no-optimize --public-url .",
         "build:electron": "tsc",
-        "start": "yarn build:app && yarn build:electron && electron ./dist/electron/main.js",
+        "build": "yarn npm-run-all --parallel build:*",
+        "start": "electron ./dist/electron/main.js",
+        "dev:app": "parcel watch src/app/index.html --dist-dir dist/app --public-url .",
+        "dev:electron": "tsc -w",
+        "dev": "yarn npm-run-all --parallel dev:* start",
         "lint": "eslint -c .eslintrc --ext .ts ./src",
         "typecheck": "tsc --noEmit && yarn tsc --noEmit -p src/app/tsconfig.json"
     },
@@ -39,12 +43,14 @@
         "@typescript-eslint/eslint-plugin": "^5.13.0",
         "@typescript-eslint/parser": "^5.13.0",
         "electron": "^17.1.0",
+        "electron-reloader": "^1.2.3",
         "eslint": "^8.10.0",
         "eslint-config-prettier": "^8.5.0",
         "eslint-plugin-eslint-comments": "^3.2.0",
         "eslint-plugin-import": "^2.25.4",
         "husky": "4.3.7",
         "lint-staged": "^12.3.5",
+        "npm-run-all": "^4.1.5",
         "parcel": "^2.3.2",
         "prettier": "^2.5.1",
         "typescript": "^4.6.2"
