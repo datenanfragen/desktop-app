@@ -13,6 +13,22 @@ const createWindow = () => {
     const win = new BrowserWindow({
         width: 1920,
         height: 900,
+
+        webPreferences: {
+            devTools: !app.isPackaged,
+
+            // Explicitly set security preferences to their (secure) defaults, just in case.
+            nodeIntegration: false,
+            nodeIntegrationInWorker: false,
+            nodeIntegrationInSubFrames: false,
+            sandbox: true,
+            webSecurity: true,
+            allowRunningInsecureContent: false,
+            experimentalFeatures: false,
+            contextIsolation: true,
+            webviewTag: false,
+            navigateOnDragDrop: false,
+        },
     });
 
     win.loadFile(join(__dirname, '..', 'app', 'index.html'));
