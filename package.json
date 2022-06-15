@@ -35,10 +35,11 @@
         "typecheck": "tsc --noEmit && yarn tsc --noEmit -p src/app/tsconfig.json"
     },
     "dependencies": {
+        "@datenanfragen/components": "^1.0.0",
         "preact": "^10.6.6"
     },
     "devDependencies": {
-        "@parcel/transformer-sass": "2.3.2",
+        "@parcel/transformer-sass": "2.6.0",
         "@types/node": "^17.0.21",
         "@typescript-eslint/eslint-plugin": "^5.13.0",
         "@typescript-eslint/parser": "^5.13.0",
