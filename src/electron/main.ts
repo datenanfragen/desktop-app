@@ -1,13 +1,5 @@
 import { app, BrowserWindow, session } from 'electron';
 import { join } from 'path';
-import electronReloader from 'electron-reloader';
-
-try {
-    electronReloader(module, {
-        ignore: [/src\/.+/],
-        watchRenderer: false, // We are using Parcel's HMR.
-    });
-} catch {}
 
 const createWindow = () => {
     const win = new BrowserWindow({
@@ -31,7 +23,7 @@ const createWindow = () => {
         },
     });
 
-    win.loadFile(join(__dirname, '..', 'app', 'index.html'));
+    win.loadFile(join(__dirname, '..', '..', 'dist', 'app', 'index.html'));
 
     if (!app.isPackaged) win.webContents.openDevTools();
 };
