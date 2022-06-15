@@ -23,14 +23,34 @@
     "bugs": {
         "url": "https://github.com/datenanfragen/desktop-app/issues"
     },
+    "targets": {
+        "app": {
+            "source": "src/app/index.html",
+            "context": "browser",
+            "outputFormat": "global",
+            "optimize": false,
+            "includeNodeModules": true,
+            "publicUrl": ".",
+            "sourceMap": false
+        },
+        "electron-main": {
+            "source": [
+                "src/electron/main.ts"
+            ],
+            "context": "electron-main",
+            "includeNodeModules": true,
+            "optimize": false,
+            "sourceMap": false
+        }
+    },
     "scripts": {
-        "build:app": "parcel build src/app/index.html --dist-dir dist/app --no-optimize --public-url .",
-        "build:electron": "tsc",
-        "build": "yarn npm-run-all --parallel build:*",
-        "start": "electron ./dist/electron/main.js",
-        "dev:app": "parcel watch src/app/index.html --dist-dir dist/app --public-url .",
-        "dev:electron": "tsc -w",
-        "dev": "yarn npm-run-all --parallel dev:* start",
+        "build:clean": "rimraf dist",
+        "build:parcel": "parcel build",
+        "build": "npm-run-all --sequential build:clean build:parcel",
+        "watch:parcel": "parcel watch",
+        "watch": "npm-run-all --sequential build:clean watch:parcel",
+        "start": "electron ./dist/electron-main/main.js",
+        "start-dev": "electronmon ./dist/electron-main/main.js",
         "lint": "eslint -c .eslintrc --ext .ts ./src",
         "typecheck": "tsc --noEmit && yarn tsc --noEmit -p src/app/tsconfig.json"
     },
@@ -43,8 +63,8 @@
         "@types/node": "^17.0.21",
         "@typescript-eslint/eslint-plugin": "^5.13.0",
         "@typescript-eslint/parser": "^5.13.0",
-        "electron": "^17.1.0",
-        "electron-reloader": "^1.2.3",
+        "electron": "^19.0.4",
+        "electronmon": "^2.0.2",
         "eslint": "^8.10.0",
         "eslint-config-prettier": "^8.5.0",
         "eslint-plugin-eslint-comments": "^3.2.0",
@@ -54,6 +74,7 @@
         "npm-run-all": "^4.1.5",
         "parcel": "^2.3.2",
         "prettier": "^2.5.1",
+        "rimraf": "^3.0.2",
         "typescript": "^4.6.2"
     },
     "alias": {
