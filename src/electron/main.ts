@@ -1,5 +1,6 @@
-import { app, BrowserWindow, session } from 'electron';
 import { join } from 'path';
+import { app, BrowserWindow, session } from 'electron';
+import { setupIpc } from './ipc';
 
 const createWindow = () => {
     const win = new BrowserWindow({
@@ -7,6 +8,8 @@ const createWindow = () => {
         height: 900,
 
         webPreferences: {
+            preload: join(__dirname, 'preload.js'),
+
             devTools: !app.isPackaged,
 
             // Explicitly set security preferences to their (secure) defaults, just in case.
@@ -52,6 +55,7 @@ app.whenReady().then(() => {
         })
     );
 
+    setupIpc();
     createWindow();
 
     // OS-specific behaviour.
