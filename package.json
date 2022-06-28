@@ -1,8 +1,16 @@
 {
     "name": "datenanfragen-desktop-app",
-    "version": "1.0.0",
+    "version": "0.1.0-beta",
     "private": true,
+    "main": "parcel_dist/electron-main/main.js",
     "description": "An Electron-based desktop app for Datenanfragen.de",
+    "keywords": [
+        "privacy",
+        "gdpr",
+        "eu-gdpr",
+        "data-protection",
+        "dsar-generator"
+    ],
     "author": "The Datenanfragen.de project <dev@datenanfragen.de> (https://www.datenanfragen.de)",
     "contributors": [
         {
@@ -23,6 +31,8 @@
     "bugs": {
         "url": "https://github.com/datenanfragen/desktop-app/issues"
     },
+    "homepage": "https://www.datenanfragen.de",
+    "license": "MIT",
     "targets": {
         "app": {
             "source": "src/app/index.html",
@@ -50,15 +60,18 @@
         }
     },
     "scripts": {
-        "build:clean": "rimraf dist",
-        "build:parcel": "parcel build --no-source-maps",
+        "build:clean": "rimraf parcel_dist",
+        "build:parcel": "parcel build --no-source-maps --dist-dir parcel_dist",
         "build": "npm-run-all --sequential build:clean build:parcel",
-        "watch:parcel": "parcel watch",
+        "watch:parcel": "parcel watch --dist-dir parcel_dist",
         "watch": "npm-run-all --sequential build:clean watch:parcel",
-        "start": "electron ./dist/electron-main/main.js",
-        "start-dev": "electronmon ./dist/electron-main/main.js",
+        "start": "electron ./parcel_dist/electron-main/main.js",
+        "start-dev": "electronmon ./parcel_dist/electron-main/main.js",
         "lint": "eslint -c .eslintrc --ext .ts ./src",
-        "typecheck": "tsc --noEmit && yarn tsc --noEmit -p src/app/tsconfig.json"
+        "typecheck": "tsc --noEmit && yarn tsc --noEmit -p src/app/tsconfig.json",
+        "postinstall": "electron-builder install-app-deps",
+        "pack": "electron-builder --dir",
+        "dist": "electron-builder"
     },
     "dependencies": {
         "@datenanfragen/components": "/home/benni/coding/git-repos/Datenanfragen.de/website/components-package",
@@ -77,7 +90,8 @@
         "@typescript-eslint/eslint-plugin": "^5.13.0",
         "@typescript-eslint/parser": "^5.13.0",
         "buffer": "^6.0.3",
-        "electron": "^19.0.4",
+        "electron": "^20.1.0",
+        "electron-builder": "^23.3.3",
         "electronmon": "^2.0.2",
         "eslint": "^8.10.0",
         "eslint-config-prettier": "^8.5.0",

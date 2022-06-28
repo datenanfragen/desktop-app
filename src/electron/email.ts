@@ -24,6 +24,8 @@ export const recreateEmailClients = async (options: RecreateEmailClientsOptions)
         clients.imap = new ImapFlow({
             ...options.imapCredentials,
             auth: { ...options.imapCredentials.auth, pass: (await getPassword('Datenanfragen.de', 'imap')) || '' },
+            // On Windows, the ImapFlow logger throws EBADF errors.
+            logger: false,
         });
         await clients.imap?.connect().catch(() => undefined);
     }
