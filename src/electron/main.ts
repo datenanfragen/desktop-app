@@ -26,7 +26,7 @@ const createWindow = () => {
         },
     });
 
-    win.loadFile(join(__dirname, '..', '..', 'dist', 'app', 'index.html'));
+    win.loadFile(join(__dirname, '..', '..', 'parcel_dist', 'app', 'index.html'));
 
     if (!app.isPackaged) win.webContents.openDevTools();
 };
