@@ -1,44 +1,56 @@
 import { app, BrowserWindow, session } from 'electron';
 import { join } from 'path';
-import electronReloader from 'electron-reloader';
-
-try {
-    electronReloader(module, {
-        ignore: [/src\/.+/],
-        watchRenderer: false, // We are using Parcel's HMR.
-    });
-} catch {}
 
 const createWindow = () => {
     const win = new BrowserWindow({
-        width: 800,
-        height: 600,
+        width: 1920,
+        height: 900,
+
+        webPreferences: {
+            devTools: !app.isPackaged,
+
+            // Explicitly set security preferences to their (secure) defaults, just in case.
+            nodeIntegration: false,
+            nodeIntegrationInWorker: false,
+            nodeIntegrationInSubFrames: false,
+            sandbox: true,
+            webSecurity: true,
+            allowRunningInsecureContent: false,
+            experimentalFeatures: false,
+            contextIsolation: true,
+            webviewTag: false,
+            navigateOnDragDrop: false,
+        },
     });
 
-    win.loadFile(join(__dirname, '..', 'app', 'index.html'));
+    win.loadFile(join(__dirname, '..', '..', 'parcel_dist', 'app', 'index.html'));
+
+    if (!app.isPackaged) win.webContents.openDevTools();
 };
 
 app.enableSandbox();
 app.whenReady().then(() => {
     // By default, Electron automatically approves all permission requests (notifications, camera, microphone, etc.). We
     // likely won't need any (or few) of those, so for now, we'll deny them all.
-    session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
-        callback(false);
-    });
+    session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => callback(false));
+
     // Set a secure CSP for every request.
-    session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    // TODO: Make it possible to completely disable requests to us.
+    const dade_origins =
+        'https://www.datenanfragen.de https://www.datarequests.org https://www.demandetesdonnees.fr https://www.pedidodedados.org https://www.solicituddedatos.es https://www.osobnipodaci.org https://www.gegevensaanvragen.nl';
+    session.defaultSession.webRequest.onHeadersReceived((details, callback) =>
         callback({
             responseHeaders: {
                 ...details.responseHeaders,
                 'Content-Security-Policy': [
-                    app.isPackaged
-                        ? "default-src 'self'; script-src 'self'"
-                        : // Parcel uses `ws://localhost:1234` for HMR.
-                          "default-src 'self'; script-src 'self'; connect-src 'self' ws://localhost:1234",
+                    `default-src 'self'; script-src 'self'; connect-src 'self'${
+                        // Parcel uses `ws://localhost:1234` for HMR.
+                        app.isPackaged ? '' : ' ws://localhost:1234'
+                    } ${dade_origins} https://static.dacdn.de; font-src https://static.dacdn.de data:; worker-src blob:`,
                 ],
             },
-        });
-    });
+        })
+    );
 
     createWindow();
 
