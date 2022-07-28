@@ -53,8 +53,8 @@
         "typecheck": "tsc --noEmit && yarn tsc --noEmit -p src/app/tsconfig.json"
     },
     "dependencies": {
-        "@datenanfragen/components": "/home/benni/coding/git-repos/Datenanfragen.de/website/components-package",
         "nodemailer": "^6.7.5",
+        "@datenanfragen/components": "^1.0.0",
         "preact": "^10.6.6"
     },
     "devDependencies": {
