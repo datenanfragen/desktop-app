@@ -48,8 +48,8 @@ app.whenReady().then(() => {
                 'Content-Security-Policy': [
                     `default-src 'self'; script-src 'self'; connect-src 'self'${
                         // Parcel uses `ws://localhost:1234` for HMR.
-                        app.isPackaged ? '' : ' ws://localhost:1234'
-                    } ${dade_origins} https://static.dacdn.de; font-src https://static.dacdn.de data:; worker-src blob:`,
+                        app.isPackaged ? '' : ' ws://localhost:1234 http://localhost:1314'
+                    } ${dade_origins} https://static.dacdn.de https://search.datenanfragen.de; font-src 'self' data:; worker-src blob:; img-src 'self' data:;`,
                 ],
             },
         })

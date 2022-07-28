@@ -8,6 +8,10 @@
         "skipLibCheck": true,
         "lib": ["dom", "ES2020"],
         "rootDir": "./",
-        "baseUrl": "."
+        "baseUrl": ".",
+        "resolveJsonModule": true,
+        "paths": {
+            "*": ["./js/types/*"]
+        }
     }
 }
