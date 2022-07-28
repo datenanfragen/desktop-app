@@ -1,15 +1,12 @@
-import { setupWindow } from '@datenanfragen/components';
+import { setupWindow, useAppStore } from '@datenanfragen/components';
 import en_electron_translations from '../i18n/en.json';
 
 const translations = {
     en: en_electron_translations,
 };
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-window.LOCALE = 'en';
-
-setupWindow();
+console.log(useAppStore.getState().savedLocale);
+setupWindow({ supported_languages: { en: undefined, de: undefined }, locale: useAppStore.getState().savedLocale });
 if (process.env.NODE_ENV === 'development')
     (window as typeof window & { BASE_URL: string }).BASE_URL = 'http://localhost:1314/';
 
