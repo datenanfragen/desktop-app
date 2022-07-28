@@ -63,7 +63,9 @@ body {
 
             &:hover,
             &:focus,
-            &:focus-within {
+            &:focus-within,
+            &:active,
+            &.menu-item-active {
                 background-color: $dark-blue;
             }
 

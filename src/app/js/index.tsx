@@ -4,6 +4,7 @@ import { useAppSettingsStore } from './store/settings';
 import { SetupTutorial } from './setup-tutorial';
 import { Menu } from './menu';
 import { translate } from 'preact-i18n';
+import { Settings } from './settings';
 
 const pages = (setPage: SetDesktopAppPageFunction) => ({
     newRequests: {
@@ -20,7 +21,7 @@ const pages = (setPage: SetDesktopAppPageFunction) => ({
     },
     settings: {
         title: translate('settings', 'app', window.I18N_DEFINITIONS_ELECTRON),
-        component: <h1>Settings</h1>,
+        component: <Settings />,
     },
 });
 

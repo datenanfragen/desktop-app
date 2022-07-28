@@ -3,5 +3,8 @@
         "new-requests": "New requests",
         "proceedings": "Proceedings",
         "settings": "Settings"
+    },
+    "settings": {
+        "title": "Settings"
     }
 }

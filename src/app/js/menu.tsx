@@ -25,12 +25,10 @@ export const Menu = (props: MenuProps) => (
         <nav id="main-menu">
             <ul>
                 {menuItems.map((item) => (
-                    <li>
+                    <li className={item.pageId === props.activePage ? ' menu-item-active' : ''}>
                         <a
                             href=""
-                            className={`menu-link icon icon-${item.icon}${
-                                item.pageId === props.activePage ? ' menu-item-active' : ''
-                            }`}
+                            className={`menu-link icon icon-${item.icon}`}
                             onClick={(e) => {
                                 e.preventDefault();
                                 props.setPage(item.pageId);
