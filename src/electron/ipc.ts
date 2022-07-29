@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron';
+import { ipcMain, shell } from 'electron';
 import nodemailer from 'nodemailer';
 import Mail from 'nodemailer/lib/mailer/index';
 
@@ -8,8 +8,8 @@ const transport = nodemailer.createTransport({
     port: 587,
     secure: false,
     auth: {
-        user: 'hudson.kunze77@ethereal.email',
-        pass: 'EM97p3ZM5hyZc2U2yw',
+        user: 'abby.emmerich35@ethereal.email',
+        pass: 'GD29BFTPC4MpXxXRc6',
     },
 });
 
@@ -29,5 +29,12 @@ export const setupIpc = () => {
                     accepted: info.accepted.map(stringOrNodeMailerAddressToString),
                     rejected: info.rejected.map(stringOrNodeMailerAddressToString),
                 }))
+    );
+    ipcMain.handle('email:openMailto', (_, options: SendMessageOptions) =>
+        shell.openExternal(
+            `mailto:${options.to}?subject=${encodeURIComponent(options.subject)}&body=${encodeURIComponent(
+                options.text
+            )}`
+        )
     );
 };

@@ -1,5 +1,5 @@
 import { join } from 'path';
-import { app, BrowserWindow, session } from 'electron';
+import { app, BrowserWindow, session, shell } from 'electron';
 import { setupIpc } from './ipc';
 
 const createWindow = () => {
@@ -78,7 +78,11 @@ app.on('web-contents-created', (event, contents) => {
     });
 
     // Disable opening additional windows.
-    contents.setWindowOpenHandler(() => {
+    contents.setWindowOpenHandler((details) => {
+        const parsedUrl = new URL(details.url);
+        if (parsedUrl.protocol === 'mailto:') {
+            shell.openExternal(details.url);
+        }
         return { action: 'deny' };
     });
 });
