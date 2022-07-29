@@ -53,8 +53,8 @@
         "typecheck": "tsc --noEmit && yarn tsc --noEmit -p src/app/tsconfig.json"
     },
     "dependencies": {
-        "nodemailer": "^6.7.5",
         "@datenanfragen/components": "/home/zner0L/Programming/Webpages/datenanfragen.de/website/components-package",
+        "nodemailer": "^6.7.5",
         "preact": "^10.6.6",
         "preact-i18n": "^2.3.0-preactx"
     },

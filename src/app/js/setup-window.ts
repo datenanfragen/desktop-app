@@ -17,14 +17,16 @@ window.I18N_DEFINITIONS_ELECTRON =
 
 // TODO: Error handler.
 const logError = (err: ErrorEvent | PromiseRejectionEvent) => {
-    // Work around annoying Chromium bug, see: https://stackoverflow.com/q/72396527
-    if ('defaultPrevented' in err && !err.defaultPrevented) console.error('An error occurred:', err);
+    console.error('An error occurred:', err);
 };
 
-const errorHandler = (err: Error | ErrorEvent) => {
+const errorHandler = (err: ErrorEvent) => {
     const errorNotification = new Notification('An error occured', { body: err.message });
     // TODO: Add onclick handler
     logError(err);
 };
-window.addEventListener('unhandledrejection', (e) => errorHandler(e.reason));
+window.addEventListener('unhandledrejection', (e) => {
+    // Work around annoying Chromium bug, see: https://stackoverflow.com/q/72396527
+    if ('defaultPrevented' in e && !e.defaultPrevented) errorHandler(e.reason);
+});
 window.addEventListener('error', errorHandler);

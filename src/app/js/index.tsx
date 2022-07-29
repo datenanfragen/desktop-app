@@ -11,13 +11,42 @@ const pages = (setPage: SetDesktopAppPageFunction) => ({
         title: translate('new-requests', 'app', window.I18N_DEFINITIONS_ELECTRON),
         component: (
             <RequestGeneratorProvider createStore={createGeneratorStore}>
-                <App />
+                <App
+                    pageOptions={{
+                        mailtoDropdown: {
+                            handlers: ['mailto', 'sendmail'],
+                            sendEmail: (options) =>
+                                window.email.sendMessage(options).then((info) => {
+                                    console.log(info);
+                                    return info;
+                                }),
+                        },
+                    }}
+                />
             </RequestGeneratorProvider>
         ),
     },
     proceedings: {
         title: translate('proceedings', 'app', window.I18N_DEFINITIONS_ELECTRON),
-        component: <h1>Proceedings</h1>,
+        component: (
+            <>
+                <h1>Proceedings</h1>
+                <button
+                    onClick={() =>
+                        window.email
+                            .sendMessage({
+                                from: 'hi@example.org',
+                                to: 'abby.emmerich35@ethereal.email',
+                                subject: 'Hello world',
+                                text: 'How is it going?',
+                            })
+                            .then((info) => console.log(info))
+                    }
+                >
+                    Test
+                </button>
+            </>
+        ),
     },
     settings: {
         title: translate('settings', 'app', window.I18N_DEFINITIONS_ELECTRON),
