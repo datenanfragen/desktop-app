@@ -5,6 +5,15 @@
         "settings": "Settings"
     },
     "settings": {
-        "title": "Settings"
+        "title": "Settings",
+        "email-settings": "Email settings",
+        "email-settings-explanation": "If you want to send email directly from the app via an existing mailserver, you can add your login credentials here. We support all server configurations supported by nodemailer.",
+        "from-email": "From email",
+        "email-password": "Email account password",
+        "email-host": "SMTP server hostname",
+        "email-port": "SMTP server port",
+        "show-password": "Show password while typing",
+        "from-email-placeholder": "test@example.com",
+        "email-secure": "Try to use an encrypted connection (STARTTLS)"
     }
 }

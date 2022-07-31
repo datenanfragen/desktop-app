@@ -1,17 +1,36 @@
-import create, { SetState } from 'zustand';
+import create from 'zustand';
 import { persist } from 'zustand/middleware';
+import { produce } from 'immer';
 
 type AppSettingsState = {
     showTutorial: boolean;
 
     setShowTutorial: (showTutorial: boolean) => void;
-};
-export const useAppSettingsStore = create(
-    persist(
-        (set: SetState<AppSettingsState>) => ({
-            showTutorial: true,
+    setSmtpSetting: (setting: keyof SmtpSettings, value: string | number | boolean) => void;
+} & SmtpSettings;
 
-            setShowTutorial: (showTutorial: boolean) => set({ showTutorial }),
+export type SmtpSettings = {
+    fromEmail?: string;
+    smtpPort: number;
+    smtpHost: string;
+    smtpSecure: boolean;
+};
+export const useAppSettingsStore = create<AppSettingsState>(
+    persist(
+        (set, get) => ({
+            showTutorial: true,
+            // I would've wanted those to reside in their own object, but apparently zustand can't handles this here properly and it breaks referential euqality causing unwanted rerenders, so we have to accept this ugly prefix.
+            smtpPort: 587,
+            smtpSecure: true,
+            smtpHost: 'example.com',
+
+            setShowTutorial: (showTutorial) => set({ showTutorial }),
+            setSmtpSetting: (smtpSetting, value) =>
+                set(
+                    produce((state) => {
+                        state[smtpSetting] = value;
+                    })
+                ),
         }),
         {
             name: 'Datenanfragen.de-app-settings',

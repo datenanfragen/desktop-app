@@ -6,5 +6,6 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('email', {
     sendMessage: (options) => ipcRenderer.invoke('email:sendMessage', options),
+    setSmtpPassword: (password) => ipcRenderer.invoke('email:setSmtpPassword', password),
 });
 /* eslint-enable @typescript-eslint/no-var-requires */

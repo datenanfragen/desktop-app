@@ -5,7 +5,6 @@ const translations = {
     en: en_electron_translations,
 };
 
-console.log(useAppStore.getState().savedLocale);
 setupWindow({ supported_languages: { en: undefined, de: undefined }, locale: useAppStore.getState().savedLocale });
 if (process.env.NODE_ENV === 'development')
     (window as typeof window & { BASE_URL: string }).BASE_URL = 'http://localhost:1314/';
