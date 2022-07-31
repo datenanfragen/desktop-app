@@ -1,12 +1,19 @@
 import { render } from 'preact';
-import { RequestGeneratorProvider, createGeneratorStore, App, useWizard } from '@datenanfragen/components';
+import {
+    RequestGeneratorProvider,
+    createGeneratorStore,
+    App,
+    useWizard,
+    mailto_handlers,
+    EmailData,
+} from '@datenanfragen/components';
 import { useAppSettingsStore } from './store/settings';
 import { SetupTutorial } from './setup-tutorial';
 import { Menu } from './menu';
 import { translate } from 'preact-i18n';
 import { Settings } from './settings';
 
-const pages = (setPage: SetDesktopAppPageFunction) => ({
+const pages = (setPage: SetDesktopAppPageFunction, sendMail?: (data: EmailData) => void) => ({
     newRequests: {
         title: translate('new-requests', 'app', window.I18N_DEFINITIONS_ELECTRON),
         component: (
@@ -14,12 +21,15 @@ const pages = (setPage: SetDesktopAppPageFunction) => ({
                 <App
                     pageOptions={{
                         mailtoDropdown: {
-                            handlers: ['mailto', 'sendmail'],
-                            sendEmail: (options) =>
-                                window.email.sendMessage(options).then((info) => {
-                                    console.log(info);
-                                    return info;
-                                }),
+                            handlers: sendMail
+                                ? ['mailto', 'sendmail' as unknown as keyof typeof mailto_handlers]
+                                : ['mailto'],
+                            additionalHandlers: {
+                                sendmail: {
+                                    onClick: (d, _) => sendMail?.(d),
+                                    countries: [],
+                                },
+                            },
                         },
                     }}
                 />
@@ -59,7 +69,35 @@ export type SetDesktopAppPageFunction = (newPage: DesktopAppPageId) => void;
 
 const DesktopApp = () => {
     const showTutorial = useAppSettingsStore((state) => state.showTutorial);
-    const { Wizard, set, pageId } = useWizard(pages(setPage), {
+    const [port, host, fromEmail, secure] = useAppSettingsStore((state) => [
+        state.smtpPort,
+        state.smtpHost,
+        state.fromEmail,
+        state.smtpSecure,
+    ]);
+
+    const sendMail =
+        fromEmail === ''
+            ? undefined
+            : (data: EmailData) => {
+                  window.email
+                      .sendMessage({
+                          ...data,
+                          from: fromEmail,
+                          smtpOptions: {
+                              port,
+                              host,
+                              secure,
+                              account: fromEmail, // TODO: Support multiple from adresses
+                          },
+                      })
+                      .then((info) => {
+                          console.log(info);
+                          return info;
+                      });
+              };
+
+    const { Wizard, set, pageId } = useWizard(pages(setPage, sendMail), {
         initialPageId: 'newRequests',
     });
 
