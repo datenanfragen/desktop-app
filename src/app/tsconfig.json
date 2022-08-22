@@ -9,9 +9,6 @@
         "lib": ["dom", "ES2020"],
         "rootDir": "./",
         "baseUrl": ".",
-        "resolveJsonModule": true,
-        "paths": {
-            "*": ["./js/types/*"]
-        }
+        "resolveJsonModule": true
     }
 }
