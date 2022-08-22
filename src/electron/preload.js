@@ -5,7 +5,10 @@ const { contextBridge, ipcRenderer } = require('electron');
 // noticably more complex than this, that's not too much of a problem.
 
 contextBridge.exposeInMainWorld('email', {
+    recreateEmailClients: (options) => ipcRenderer.invoke('email:recreateEmailClients', options),
+    verifyConnection: () => ipcRenderer.invoke('email:verifyConnection'),
+    setEmailAccountPassword: (protocol, password) =>
+        ipcRenderer.invoke('email:setEmailAccountPassword', protocol, password),
     sendMessage: (options) => ipcRenderer.invoke('email:sendMessage', options),
-    setSmtpPassword: (password) => ipcRenderer.invoke('email:setSmtpPassword', password),
 });
 /* eslint-enable @typescript-eslint/no-var-requires */

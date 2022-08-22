@@ -69,32 +69,17 @@ export type SetDesktopAppPageFunction = (newPage: DesktopAppPageId) => void;
 
 const DesktopApp = () => {
     const showTutorial = useAppSettingsStore((state) => state.showTutorial);
-    const [port, host, fromEmail, secure] = useAppSettingsStore((state) => [
-        state.smtpPort,
-        state.smtpHost,
-        state.fromEmail,
-        state.smtpSecure,
-    ]);
+    // TODO: Allow specifying an actual from email.
+    const [fromEmail] = useAppSettingsStore((state) => [state.smtpUser]);
 
     const sendMail =
         fromEmail === ''
             ? undefined
             : (data: EmailData) => {
-                  window.email
-                      .sendMessage({
-                          ...data,
-                          from: fromEmail,
-                          smtpOptions: {
-                              port,
-                              host,
-                              secure,
-                              account: fromEmail, // TODO: Support multiple from adresses
-                          },
-                      })
-                      .then((info) => {
-                          console.log(info);
-                          return info;
-                      });
+                  window.email.sendMessage({ ...data, from: fromEmail }).then((info) => {
+                      console.log(info);
+                      return info;
+                  });
               };
 
     const { Wizard, set, pageId } = useWizard(pages(setPage, sendMail), {
