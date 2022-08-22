@@ -6,16 +6,16 @@ import {
     useWizard,
     mailto_handlers,
     EmailData,
+    t_a,
 } from '@datenanfragen/components';
 import { useAppSettingsStore } from './store/settings';
 import { SetupTutorial } from './setup-tutorial';
 import { Menu } from './menu';
-import { translate } from 'preact-i18n';
 import { Settings } from './settings';
 
 const pages = (setPage: SetDesktopAppPageFunction, sendMail?: (data: EmailData) => void) => ({
     newRequests: {
-        title: translate('new-requests', 'app', window.I18N_DEFINITIONS_ELECTRON),
+        title: t_a('new-requests', 'app'),
         component: (
             <RequestGeneratorProvider createStore={createGeneratorStore}>
                 <App
@@ -26,7 +26,7 @@ const pages = (setPage: SetDesktopAppPageFunction, sendMail?: (data: EmailData) 
                                 : ['mailto'],
                             additionalHandlers: {
                                 sendmail: {
-                                    onClick: (d, _) => sendMail?.(d),
+                                    onClick: (d) => sendMail?.(d),
                                     countries: [],
                                 },
                             },
@@ -37,7 +37,7 @@ const pages = (setPage: SetDesktopAppPageFunction, sendMail?: (data: EmailData) 
         ),
     },
     proceedings: {
-        title: translate('proceedings', 'app', window.I18N_DEFINITIONS_ELECTRON),
+        title: t_a('proceedings', 'app'),
         component: (
             <>
                 <h1>Proceedings</h1>
@@ -59,7 +59,7 @@ const pages = (setPage: SetDesktopAppPageFunction, sendMail?: (data: EmailData) 
         ),
     },
     settings: {
-        title: translate('settings', 'app', window.I18N_DEFINITIONS_ELECTRON),
+        title: t_a('settings', 'app'),
         component: <Settings />,
     },
 });

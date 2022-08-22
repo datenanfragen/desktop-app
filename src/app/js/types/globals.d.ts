@@ -1,4 +1,4 @@
-import type i18n_definition_type from '../../i18n/en.json';
+import type { appTranslations } from '@datenanfragen/components';
 
 declare global {
     interface Window {
@@ -10,6 +10,6 @@ declare global {
         /** Two-letter ISO code of the site's language. */
         readonly LOCALE: string;
 
-        readonly I18N_DEFINITIONS_ELECTRON: typeof i18n_definition_type;
+        readonly I18N_DEFINITION_APP: typeof appTranslations['en'];
     }
 }
