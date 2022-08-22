@@ -9,6 +9,14 @@
         "lib": ["dom", "ES2020"],
         "rootDir": "./",
         "baseUrl": ".",
-        "resolveJsonModule": true
+        "resolveJsonModule": true,
+
+        "target": "es2021",
+        "module": "commonjs",
+        "strictNullChecks": true,
+        "forceConsistentCasingInFileNames": true,
+        "noImplicitAny": true,
+        "sourceMap": true,
+        "noEmit": true
     }
 }

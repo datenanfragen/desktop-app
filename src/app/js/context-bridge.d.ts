@@ -1,10 +1,17 @@
-import type { SendMessageOptions, SendMessageReturn } from '../../electron/ipc';
+import type {
+    SendMessageOptions,
+    SendMessageReturn,
+    RecreateEmailClientsOptions,
+    RecreateEmailClientsReturn,
+} from '../../electron/email';
 
 declare global {
     interface Window {
         email: {
-            sendMessage: (options: SendMessageOptions) => Promise<SendMessageReturn>;
-            setSmtpPassword: (password: string) => Promise<void>;
+            recreateEmailClients: (options: RecreateEmailClientsOptions) => Promise<RecreateEmailClientsReturn>;
+            verifyConnection: () => Promise<boolean>;
+            setEmailAccountPassword: (protocol: 'imap' | 'smtp', password: string) => Promise<void>;
+            sendMessage: (options: SendMessageOptions) => SendMessageReturn;
         };
     }
 }
