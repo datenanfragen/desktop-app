@@ -17,8 +17,10 @@ export type EmailAccountSettings = {
 };
 type AppSettingsState = {
     showTutorial: boolean;
+    receiveNotifications: boolean;
 
     setShowTutorial: (showTutorial: boolean) => void;
+    setReceiveNotifications: (receiveNotifications: boolean) => void;
     setEmailAccountSetting: <KeyT extends keyof EmailAccountSettings>(
         setting: KeyT | 'imapUseStartTls' | 'smtpUseStartTls',
         value: EmailAccountSettings[KeyT]
@@ -31,6 +33,7 @@ export const useAppSettingsStore = create<AppSettingsState>(
     persist(
         (set, get) => ({
             showTutorial: true,
+            receiveNotifications: false,
 
             imapUser: '',
             imapHost: '',
@@ -43,6 +46,7 @@ export const useAppSettingsStore = create<AppSettingsState>(
             smtpUseSsl: false,
 
             setShowTutorial: (showTutorial) => set({ showTutorial }),
+            setReceiveNotifications: (receiveNotifications) => set({ receiveNotifications }),
             setEmailAccountSetting: async (setting, value) => {
                 if (setting === 'imapPassword') await window.email.setEmailAccountPassword('imap', value as string);
                 else if (setting === 'smtpPassword')

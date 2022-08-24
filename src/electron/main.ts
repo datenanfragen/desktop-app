@@ -34,8 +34,11 @@ const createWindow = () => {
 app.enableSandbox();
 app.whenReady().then(() => {
     // By default, Electron automatically approves all permission requests (notifications, camera, microphone, etc.). We
-    // likely won't need any (or few) of those, so for now, we'll deny them all.
-    session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => callback(false));
+    // only need notifications, so we deny the rest.
+    session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
+        if (permission === 'notifications') callback(true);
+        else callback(false);
+    });
 
     // Set a secure CSP for every request.
     // TODO: Make it possible to completely disable requests to us.

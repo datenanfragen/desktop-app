@@ -1,4 +1,5 @@
-import type { appTranslations } from '@datenanfragen/components';
+import type { appTranslations, Proceeding, ProceedingStatus } from '@datenanfragen/components';
+import type { DesktopAppPageId } from '../index';
 
 declare global {
     interface Window {
@@ -11,5 +12,8 @@ declare global {
         readonly LOCALE: string;
 
         readonly I18N_DEFINITION_APP: typeof appTranslations['en'];
+
+        ON_PROCEEDING_STATUS_CHANGE?: (proceeding: Proceeding, oldStatus: ProceedingStatus) => void;
+        setPage?: (newPage: DesktopAppPageId) => void;
     }
 }
