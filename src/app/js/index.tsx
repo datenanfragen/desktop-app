@@ -72,6 +72,7 @@ const DesktopApp = () => {
     function setPage(new_page: DesktopAppPageId) {
         set(new_page);
     }
+    window.setPage = setPage;
 
     return showTutorial ? (
         <SetupTutorial />
