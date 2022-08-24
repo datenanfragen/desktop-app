@@ -8,6 +8,7 @@ import {
     EmailData,
     t_a,
     AppMenu,
+    ProceedingsList,
 } from '@datenanfragen/components';
 import { useAppSettingsStore } from './store/settings';
 import { SetupTutorial } from './setup-tutorial';
@@ -38,25 +39,7 @@ const pages = (setPage: SetDesktopAppPageFunction, sendMail?: (data: EmailData) 
     },
     proceedings: {
         title: t_a('proceedings', 'app'),
-        component: (
-            <>
-                <h1>Proceedings</h1>
-                <button
-                    onClick={() =>
-                        window.email
-                            .sendMessage({
-                                from: 'hi@example.org',
-                                to: 'abby.emmerich35@ethereal.email',
-                                subject: 'Hello world',
-                                text: 'How is it going?',
-                            })
-                            .then((info) => console.log(info))
-                    }
-                >
-                    Test
-                </button>
-            </>
-        ),
+        component: <ProceedingsList setPage={setPage} />,
     },
     settings: {
         title: t_a('settings', 'app'),
