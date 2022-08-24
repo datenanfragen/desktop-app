@@ -7,10 +7,10 @@ import {
     mailto_handlers,
     EmailData,
     t_a,
+    AppMenu,
 } from '@datenanfragen/components';
 import { useAppSettingsStore } from './store/settings';
 import { SetupTutorial } from './setup-tutorial';
-import { Menu } from './menu';
 import { Settings } from './settings';
 
 const pages = (setPage: SetDesktopAppPageFunction, sendMail?: (data: EmailData) => void) => ({
@@ -94,7 +94,7 @@ const DesktopApp = () => {
         <SetupTutorial />
     ) : (
         <>
-            <Menu setPage={setPage} activePage={pageId} />
+            <AppMenu setPage={setPage} activePage={pageId} />
             <Wizard />
         </>
     );
