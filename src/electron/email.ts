@@ -1,11 +1,16 @@
-import { ImapFlow } from 'imapflow';
-import nodemailer from 'nodemailer';
+import { ImapFlow, ImapFlowOptions } from 'imapflow';
 import { getPassword } from 'keytar';
+import nodemailer from 'nodemailer';
 import Mail from 'nodemailer/lib/mailer/index';
+import MailComposer from 'nodemailer/lib/mail-composer';
+import type SMTPTransport from 'nodemailer/lib/smtp-transport';
 
-const clients: { imap: ImapFlow | undefined; smtp: nodemailer.Transporter | undefined } = {
-    imap: undefined,
-    smtp: undefined,
+const clients: {
+    imapOptions: ImapFlowOptions | undefined;
+    smtpOptions: SMTPTransport.Options | undefined;
+} = {
+    imapOptions: undefined,
+    smtpOptions: undefined,
 };
 
 const stringOrNodeMailerAddressToString = (address: Mail.Address | string) =>
@@ -21,36 +26,68 @@ export type RecreateEmailClientsOptions = { imapCredentials?: Credentials; smtpC
 export type RecreateEmailClientsReturn = Promise<void>;
 export const recreateEmailClients = async (options: RecreateEmailClientsOptions): RecreateEmailClientsReturn => {
     if (options.imapCredentials) {
-        clients.imap = new ImapFlow({
+        clients.imapOptions = {
             ...options.imapCredentials,
             auth: { ...options.imapCredentials.auth, pass: (await getPassword('Datenanfragen.de', 'imap')) || '' },
             // On Windows, the ImapFlow logger throws EBADF errors.
             logger: false,
-        });
-        await clients.imap?.connect().catch(() => undefined);
+        };
     }
     if (options.smtpCredentials)
-        clients.smtp = nodemailer.createTransport({
+        clients.smtpOptions = {
             ...options.smtpCredentials,
             auth: { ...options.smtpCredentials.auth, pass: (await getPassword('Datenanfragen.de', 'smtp')) || '' },
-        });
+        };
 };
 
-export const ensureConnection = async () => {
-    if (!clients.imap) throw new Error('IMAP not logged in.');
-    if (!clients.smtp) throw new Error('SMTP not logged in.');
+export const verifyConnections = async () => {
+    if (!clients.imapOptions) throw new Error('No IMAP options.');
+    if (!clients.smtpOptions) throw new Error('Not SMTP options.');
 
-    await clients.imap.connect();
-    await clients.smtp.verify();
+    await new ImapFlow({ ...clients.imapOptions, verifyOnly: true }).connect();
+    await nodemailer.createTransport(clients.smtpOptions).verify();
+};
+
+export const getImapConnection = async () => {
+    if (!clients.imapOptions) throw new Error('No IMAP options.');
+    const imapClient = new ImapFlow(clients.imapOptions);
+    await imapClient.connect();
+    return imapClient;
+};
+
+const getSentFolder = (imapClient: ImapFlow) => {
+    if (!imapClient.usable) throw new Error('IMAP client not usable.');
+    return imapClient?.list().then((folders) => {
+        const sentFolder = folders?.filter((folder) => folder.specialUse === '\\Sent');
+        return sentFolder && sentFolder.length > 0 ? sentFolder[0].path : undefined;
+    });
 };
 
 export type SendMessageOptions = { from: string; to: string; subject: string; text: string };
 export type SendMessageReturn = Promise<{ accepted: string[]; rejected: string[] }>;
 export const sendEmail = async (options: SendMessageOptions): SendMessageReturn => {
-    await ensureConnection();
+    return nodemailer
+        .createTransport(clients.smtpOptions)
+        .sendMail(options)
+        .then((info) => {
+            console.log(info);
+            new MailComposer({ ...options, headers: { 'Message-ID': info.messageId } })
+                .compile()
+                .build()
+                .then((sentEmailContent) =>
+                    getImapConnection().then((imapClient) =>
+                        getSentFolder(imapClient)
+                            .then((sentFolder) => {
+                                if (sentFolder) return imapClient.append(sentFolder, sentEmailContent, ['\\Seen']);
+                            })
+                            .finally(() => imapClient.logout())
+                    )
+                );
 
-    return clients.smtp!.sendMail(options).then((info) => ({
-        accepted: info.accepted.map(stringOrNodeMailerAddressToString),
-        rejected: info.rejected.map(stringOrNodeMailerAddressToString),
-    }));
+            return {
+                accepted: info.accepted.map(stringOrNodeMailerAddressToString),
+                rejected: info.rejected.map(stringOrNodeMailerAddressToString),
+                messageId: info.messageId,
+            };
+        });
 };

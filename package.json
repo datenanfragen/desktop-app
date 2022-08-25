@@ -74,8 +74,8 @@
         "dist": "electron-builder"
     },
     "dependencies": {
-        "@datenanfragen/components": "/home/benni/coding/git-repos/Datenanfragen.de/website/components-package",
-        "imapflow": "^1.0.101",
+        "@datenanfragen/components": "/home/zner0L/Programming/Webpages/datenanfragen.de/website/components-package",
+        "imapflow": "^1.0.106",
         "keytar": "^7.9.0",
         "nodemailer": "^6.7.5",
         "preact": "^10.6.6",
