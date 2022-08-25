@@ -16,33 +16,46 @@ import { useAppSettingsStore } from './store/settings';
 import { SetupTutorial } from './setup-tutorial';
 import { Settings } from './settings';
 
-const pages = (
-    setPage: SetDesktopAppPageFunction,
-    offlineSearch: false | Parameters<typeof miniSearchClient>[0],
-    sendMail?: (data: EmailData) => void
-) => ({
-    newRequests: {
-        title: t_a('new-requests', 'app'),
-        component: (
-            <RequestGeneratorProvider createStore={createGeneratorStore}>
-                <App
-                    pageOptions={{
-                        mailtoDropdown: {
-                            handlers: sendMail
-                                ? ['mailto', 'sendmail' as unknown as keyof typeof mailto_handlers]
-                                : ['mailto'],
-                            additionalHandlers: {
-                                sendmail: {
-                                    onClick: (d) => sendMail?.(d),
-                                    countries: [],
-                                },
+const NewRequestsPage = () => {
+    const [fromEmail, useOfflineSearch] = useAppSettingsStore((state) => [state.smtpUser, state.useOfflineSearch]);
+    const miniSearch = useCacheStore((state) => state.miniSearch);
+
+    const sendMail =
+        fromEmail === ''
+            ? undefined
+            : (data: EmailData) => {
+                  window.email.sendMessage({ ...data, from: fromEmail }).then((info) => {
+                      console.log(info);
+                      return info;
+                  });
+              };
+
+    return (
+        <RequestGeneratorProvider createStore={createGeneratorStore}>
+            <App
+                pageOptions={{
+                    mailtoDropdown: {
+                        handlers: sendMail
+                            ? ['mailto', 'sendmail' as unknown as keyof typeof mailto_handlers]
+                            : ['mailto'],
+                        additionalHandlers: {
+                            sendmail: {
+                                onClick: (d) => sendMail?.(d),
+                                countries: [],
                             },
                         },
-                        searchClient: offlineSearch ? (params) => miniSearchClient(offlineSearch, params) : undefined,
-                    }}
-                />
-            </RequestGeneratorProvider>
-        ),
+                    },
+                    searchClient: useOfflineSearch ? (params) => miniSearchClient(miniSearch, params) : undefined,
+                }}
+            />
+        </RequestGeneratorProvider>
+    );
+};
+
+const pages = (setPage: SetDesktopAppPageFunction) => ({
+    newRequests: {
+        title: t_a('new-requests', 'app'),
+        component: <NewRequestsPage />,
     },
     proceedings: {
         title: t_a('proceedings', 'app'),
@@ -62,23 +75,12 @@ const DesktopApp = () => {
         state.showTutorial,
         state.useOfflineSearch,
     ]);
-    // TODO: Allow specifying an actual from email.
-    const [fromEmail] = useAppSettingsStore((state) => [state.smtpUser]);
-
-    const [miniSearch, offlineDataDate] = useCacheStore((state) => [state.miniSearch, state.date]);
+    const offlineDataDate = useCacheStore((state) => state.date);
     const updateOfflineData = useCacheStore((state) => state.updateOfflineData);
 
-    const sendMail =
-        fromEmail === ''
-            ? undefined
-            : (data: EmailData) => {
-                  window.email.sendMessage({ ...data, from: fromEmail }).then((info) => {
-                      console.log(info);
-                      return info;
-                  });
-              };
+    // TODO: Allow specifying an actual from email.
 
-    const { Wizard, set, pageId } = useWizard(pages(setPage, useOfflineSearch ? miniSearch : false, sendMail), {
+    const { Wizard, set, pageId } = useWizard(pages(setPage), {
         initialPageId: 'newRequests',
     });
 
