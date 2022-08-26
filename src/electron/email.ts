@@ -63,6 +63,60 @@ const getSentFolder = (imapClient: ImapFlow) => {
     });
 };
 
+export const getFolders = () =>
+    getImapConnection().then((imapClient) =>
+        imapClient
+            .list()
+            .then((folderList) => folderList.map((folder) => folder.path))
+            .finally(() => imapClient.logout())
+    );
+
+export type GetMessageOptions = {
+    folder: string;
+    cursor?: number;
+    limit?: number;
+};
+export type GetMessageResult = {
+    seq: number;
+    uid: number;
+    envelope: {
+        from?: EmailAddress[];
+        to?: EmailAddress[];
+        subject?: string;
+        messageId?: string;
+        inReplyTo?: string;
+        date?: Date;
+    };
+};
+type EmailAddress = {
+    name?: string;
+    address?: string;
+};
+
+export const getMessages = (options: GetMessageOptions): Promise<GetMessageResult[]> =>
+    getImapConnection().then((imapClient) =>
+        imapClient
+            .getMailboxLock(options.folder)
+            .then(async (lock) => {
+                const messages = [];
+
+                try {
+                    for await (const msg of imapClient.fetch(
+                        `${options.cursor || 1}:${options.limit ? (options.cursor || 1) + options.limit : '*'}`,
+                        { envelope: true }
+                    )) {
+                        console.log(msg);
+                        messages.push(msg);
+                    }
+                } finally {
+                    lock.release();
+                }
+
+                return messages;
+            })
+            .finally(() => imapClient.logout())
+    );
+
 export type SendMessageOptions = { from: string; to: string; subject: string; text: string };
 export type SendMessageReturn = Promise<{ accepted: string[]; rejected: string[] }>;
 export const sendEmail = async (options: SendMessageOptions): SendMessageReturn => {

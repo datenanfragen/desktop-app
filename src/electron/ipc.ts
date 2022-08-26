@@ -2,12 +2,16 @@ import { ipcMain, shell } from 'electron';
 import * as keytar from 'keytar';
 import {
     sendEmail,
+    getFolders,
     SendMessageOptions,
     SendMessageReturn,
     recreateEmailClients,
     RecreateEmailClientsOptions,
     RecreateEmailClientsReturn,
-    ensureConnection,
+    verifyConnections,
+    GetMessageOptions,
+    getMessages,
+    GetMessageResult,
 } from './email';
 
 const isValidProtocol = (protocol: string): protocol is 'imap' | 'smtp' => ['imap', 'smtp'].includes(protocol);
@@ -19,11 +23,17 @@ export const setupIpc = () => {
     ipcMain.handle(
         'email:verifyConnection',
         (): Promise<boolean> =>
-            ensureConnection()
+            verifyConnections()
                 .then(() => true)
                 .catch(() => false)
     );
     ipcMain.handle('email:sendMessage', (_, options: SendMessageOptions): SendMessageReturn => sendEmail(options));
+    ipcMain.handle('email:getFolders', (): Promise<string[]> => getFolders());
+    ipcMain.handle(
+        'email:getMessages',
+        (_, options: GetMessageOptions): Promise<GetMessageResult[]> => getMessages(options)
+    );
+
     ipcMain.handle('email:openMailto', (_, options: SendMessageOptions) =>
         shell.openExternal(
             `mailto:${options.to}?subject=${encodeURIComponent(options.subject)}&body=${encodeURIComponent(

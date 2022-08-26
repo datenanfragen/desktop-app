@@ -10,5 +10,7 @@ contextBridge.exposeInMainWorld('email', {
     setEmailAccountPassword: (protocol, password) =>
         ipcRenderer.invoke('email:setEmailAccountPassword', protocol, password),
     sendMessage: (options) => ipcRenderer.invoke('email:sendMessage', options),
+    getFolders: () => ipcRenderer.invoke('email:getFolders'),
+    getMessages: (options) => ipcRenderer.invoke('email:getMessages', options),
 });
 /* eslint-enable @typescript-eslint/no-var-requires */

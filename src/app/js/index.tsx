@@ -59,7 +59,7 @@ const pages = (setPage: SetDesktopAppPageFunction) => ({
     },
     proceedings: {
         title: t_a('proceedings', 'app'),
-        component: <ProceedingsList setPage={setPage} />,
+        component: <ProceedingsList setPage={setPage} userEmailRegex={useAppSettingsStore.getState().smtpUser} />,
     },
     settings: {
         title: t_a('settings', 'app'),
