@@ -1,4 +1,5 @@
 import { render } from 'preact';
+import { useMemo } from 'preact/hooks';
 import {
     RequestGeneratorProvider,
     createGeneratorStore,
@@ -9,12 +10,20 @@ import {
     t_a,
     AppMenu,
     ProceedingsList,
+    miniSearchClient,
+    miniSearchIndexFromOfflineData,
+    useCacheStore,
 } from '@datenanfragen/components';
+import hardcodedOfflineData from '@datenanfragen/components/dist/offline-data.json';
 import { useAppSettingsStore } from './store/settings';
 import { SetupTutorial } from './setup-tutorial';
 import { Settings } from './settings';
 
-const pages = (setPage: SetDesktopAppPageFunction, sendMail?: (data: EmailData) => void) => ({
+const pages = (
+    setPage: SetDesktopAppPageFunction,
+    offlineSearch: false | ReturnType<typeof miniSearchIndexFromOfflineData>,
+    sendMail?: (data: EmailData) => void
+) => ({
     newRequests: {
         title: t_a('new-requests', 'app'),
         component: (
@@ -32,6 +41,7 @@ const pages = (setPage: SetDesktopAppPageFunction, sendMail?: (data: EmailData) 
                                 },
                             },
                         },
+                        searchClient: offlineSearch ? (params) => miniSearchClient(offlineSearch, params) : undefined,
                     }}
                 />
             </RequestGeneratorProvider>
@@ -51,9 +61,20 @@ export type DesktopAppPageId = keyof ReturnType<typeof pages>;
 export type SetDesktopAppPageFunction = (newPage: DesktopAppPageId) => void;
 
 const DesktopApp = () => {
-    const showTutorial = useAppSettingsStore((state) => state.showTutorial);
+    const [showTutorial, useOfflineSearch] = useAppSettingsStore((state) => [
+        state.showTutorial,
+        state.useOfflineSearch,
+    ]);
     // TODO: Allow specifying an actual from email.
     const [fromEmail] = useAppSettingsStore((state) => [state.smtpUser]);
+
+    const offlineData = useCacheStore((state) =>
+        state.offlineData ? JSON.parse(state.offlineData) : hardcodedOfflineData
+    );
+    const offlineSearch = useMemo(
+        () => (useOfflineSearch ? miniSearchIndexFromOfflineData(offlineData) : false),
+        [useOfflineSearch, offlineData]
+    );
 
     const sendMail =
         fromEmail === ''
@@ -65,7 +86,7 @@ const DesktopApp = () => {
                   });
               };
 
-    const { Wizard, set, pageId } = useWizard(pages(setPage, sendMail), {
+    const { Wizard, set, pageId } = useWizard(pages(setPage, offlineSearch, sendMail), {
         initialPageId: 'newRequests',
     });
 
