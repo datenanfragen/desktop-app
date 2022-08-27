@@ -21,9 +21,11 @@ export type EmailAccountSettings = {
 type AppSettingsState = {
     showTutorial: boolean;
     receiveNotifications: boolean;
+    useOfflineSearch: boolean;
 
     setShowTutorial: (showTutorial: boolean) => void;
     setReceiveNotifications: (receiveNotifications: boolean) => void;
+    setUseOfflineSearch: (useOfflineSearch: boolean) => void;
     setEmailAccountSetting: <KeyT extends keyof EmailAccountSettings>(
         setting: KeyT | 'imapUseStartTls' | 'smtpUseStartTls',
         value: EmailAccountSettings[KeyT]
@@ -37,6 +39,7 @@ export const useAppSettingsStore = create<AppSettingsState>(
         (set, get) => ({
             showTutorial: true,
             receiveNotifications: false,
+            useOfflineSearch: true,
 
             imapUser: '',
             imapHost: '',
@@ -50,6 +53,7 @@ export const useAppSettingsStore = create<AppSettingsState>(
 
             setShowTutorial: (showTutorial) => set({ showTutorial }),
             setReceiveNotifications: (receiveNotifications) => set({ receiveNotifications }),
+            setUseOfflineSearch: (useOfflineSearch) => set({ useOfflineSearch }),
             setEmailAccountSetting: async (setting, value) => {
                 if (setting === 'imapPassword') await window.email.setEmailAccountPassword('imap', value as string);
                 else if (setting === 'smtpPassword')
