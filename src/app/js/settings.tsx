@@ -6,7 +6,6 @@ import {
     useCacheStore,
     useAppStore,
 } from '@datenanfragen/components';
-import hardcodedOfflineData from '@datenanfragen/components/dist/offline-data.json';
 import { IntlProvider, Text } from 'preact-i18n';
 import { useAppSettingsStore } from './store/settings';
 
@@ -36,8 +35,7 @@ export const Settings = () => {
 
     const savedLocale = useAppStore((state) => state.savedLocale);
 
-    const [offlineData, updateOfflineData] = useCacheStore((state) => [state.offlineData, state.updateOfflineData]);
-    const offlineDataDate = offlineData ? JSON.parse(offlineData).date : hardcodedOfflineData.date;
+    const [offlineDataDate, updateOfflineData] = useCacheStore((state) => [state.date, state.updateOfflineData]);
 
     return (
         <IntlProvider definition={window.I18N_DEFINITION_APP} scope="settings">
