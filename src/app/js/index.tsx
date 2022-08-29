@@ -120,7 +120,7 @@ export type SetDesktopAppPageFunction = (newPage: DesktopAppPageId, params?: Rec
 
 const DesktopApp = () => {
     const [showTutorial, useOfflineSearch] = useAppSettingsStore((state) => [
-        state.showTutorial,
+        false, // Implement tutorial.
         state.useOfflineSearch,
     ]);
     const offlineDataDate = useCacheStore((state) => state.date);
