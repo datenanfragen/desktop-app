@@ -52,7 +52,7 @@ const useMailtoDropdownProps = () => {
     return props;
 };
 
-const NewRequestsPage = () => {
+const NewRequestsPage = (props: { setPage: SetDesktopAppPageFunction }) => {
     const useOfflineSearch = useAppSettingsStore((state) => state.useOfflineSearch);
     const miniSearch = useCacheStore((state) => state.miniSearch);
     const blobStorage = useMemo(() => new BlobStorage(), []);
@@ -77,6 +77,7 @@ const NewRequestsPage = () => {
                                 })
                                 .then((uuid) => ({ blobId: uuid, filename: filename || uuid + '.pdf' })),
                     },
+                    onViewRequests: () => props.setPage('proceedings'),
                 }}
             />
         </RequestGeneratorProvider>
@@ -96,7 +97,7 @@ const ReactorPage = () => {
 const pages = (setPage: SetDesktopAppPageFunction) => ({
     newRequests: {
         title: t_a('new-requests', 'app'),
-        component: <NewRequestsPage />,
+        component: <NewRequestsPage setPage={setPage} />,
     },
     reactor: {
         component: <ReactorPage />,
