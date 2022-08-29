@@ -20,6 +20,7 @@ import {
 import { useAppSettingsStore } from './store/settings';
 import { SetupTutorial } from './setup-tutorial';
 import { Settings } from './settings';
+import { NoticesPage } from './Components/NoticesPage';
 
 const NewRequestsPage = () => {
     const [fromEmail, useOfflineSearch] = useAppSettingsStore((state) => [state.smtpUser, state.useOfflineSearch]);
@@ -86,7 +87,10 @@ const pages = (setPage: SetDesktopAppPageFunction) => ({
     },
     settings: {
         title: t_a('settings', 'app'),
-        component: <Settings />,
+        component: <Settings setPage={setPage} />,
+    },
+    notices: {
+        component: <NoticesPage />,
     },
 });
 
@@ -111,6 +115,7 @@ const DesktopApp = () => {
         set(new_page);
     }
     window.setPage = setPage;
+    window.preact.onSetPage(setPage);
 
     return showTutorial ? (
         <SetupTutorial />

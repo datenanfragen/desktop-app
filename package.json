@@ -60,11 +60,12 @@
         }
     },
     "scripts": {
+        "generate-notices": "yarn licenses generate-disclaimer > NOTICES.txt",
         "build:clean": "rimraf parcel_dist",
         "build:parcel": "parcel build --no-source-maps --dist-dir parcel_dist",
-        "build": "npm-run-all --sequential build:clean build:parcel",
+        "build": "npm-run-all --sequential build:clean generate-notices build:parcel",
         "watch:parcel": "parcel watch --dist-dir parcel_dist",
-        "watch": "npm-run-all --sequential build:clean watch:parcel",
+        "watch": "npm-run-all --sequential build:clean generate-notices watch:parcel",
         "start": "electron ./parcel_dist/electron-main/main.js",
         "start-dev": "electronmon ./parcel_dist/electron-main/main.js",
         "lint": "eslint -c .eslintrc --ext .ts ./src",
@@ -82,6 +83,7 @@
         "preact-i18n": "^2.3.0-preactx"
     },
     "devDependencies": {
+        "@parcel/transformer-inline-string": "2.6.2",
         "@parcel/transformer-sass": "^2.6.0",
         "@types/imapflow": "^1.0.10",
         "@types/node": "^17.0.21",
