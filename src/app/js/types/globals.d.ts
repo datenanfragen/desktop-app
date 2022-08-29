@@ -1,5 +1,5 @@
 import type { appTranslations, Proceeding, ProceedingStatus } from '@datenanfragen/components';
-import type { DesktopAppPageId } from '../index';
+import type { SetDesktopAppPageFunction } from '../index';
 
 declare global {
     interface Window {
@@ -11,9 +11,12 @@ declare global {
         /** Two-letter ISO code of the site's language. */
         readonly LOCALE: string;
 
+        /** List of parameters specified in the URL, including both hash fragment and GET parameters. */
+        readonly PARAMETERS: Record<string, string>;
+
         readonly I18N_DEFINITION_APP: typeof appTranslations['en'];
 
         ON_PROCEEDING_STATUS_CHANGE?: (proceeding: Proceeding, oldStatus: ProceedingStatus) => void;
-        setPage?: (newPage: DesktopAppPageId) => void;
+        setPage?: SetDesktopAppPageFunction;
     }
 }

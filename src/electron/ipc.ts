@@ -1,4 +1,4 @@
-import { BrowserWindow, ipcMain, shell } from 'electron';
+import { ipcMain, shell } from 'electron';
 import * as keytar from 'keytar';
 import { legalBaseUrls, LegalBaseUrl } from './consts';
 import {

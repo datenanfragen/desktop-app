@@ -16,17 +16,16 @@ import {
     BlobStorage,
     flash,
     FlashMessage,
+    Reactor,
+    MailtoDropdownProps,
 } from '@datenanfragen/components';
 import { useAppSettingsStore } from './store/settings';
 import { SetupTutorial } from './setup-tutorial';
 import { Settings } from './settings';
 import { NoticesPage } from './Components/NoticesPage';
 
-const NewRequestsPage = () => {
-    const [fromEmail, useOfflineSearch] = useAppSettingsStore((state) => [state.smtpUser, state.useOfflineSearch]);
-    const miniSearch = useCacheStore((state) => state.miniSearch);
-    const blobStorage = useMemo(() => new BlobStorage(), []);
-
+const useMailtoDropdownProps = () => {
+    const fromEmail = useAppSettingsStore((state) => state.smtpUser);
     const sendMail =
         fromEmail === ''
             ? undefined
@@ -41,22 +40,30 @@ const NewRequestsPage = () => {
                           console.error(e);
                           flash(<FlashMessage type="error">{t_a('send-email-error', 'generator')}</FlashMessage>);
                       });
+    const props: Partial<MailtoDropdownProps> = {
+        handlers: sendMail ? ['mailto', 'sendmail' as unknown as keyof typeof mailto_handlers] : ['mailto'],
+        additionalHandlers: {
+            sendmail: {
+                onClick: (d) => sendMail?.(d),
+                countries: [],
+            },
+        },
+    };
+    return props;
+};
+
+const NewRequestsPage = () => {
+    const useOfflineSearch = useAppSettingsStore((state) => state.useOfflineSearch);
+    const miniSearch = useCacheStore((state) => state.miniSearch);
+    const blobStorage = useMemo(() => new BlobStorage(), []);
+
+    const mailtoDropdown = useMailtoDropdownProps();
 
     return (
         <RequestGeneratorProvider createStore={createGeneratorStore}>
             <App
                 pageOptions={{
-                    mailtoDropdown: {
-                        handlers: sendMail
-                            ? ['mailto', 'sendmail' as unknown as keyof typeof mailto_handlers]
-                            : ['mailto'],
-                        additionalHandlers: {
-                            sendmail: {
-                                onClick: (d) => sendMail?.(d),
-                                countries: [],
-                            },
-                        },
-                    },
+                    mailtoDropdown,
                     searchClient: useOfflineSearch ? (params) => miniSearchClient(miniSearch, params) : undefined,
                     actionButton: {
                         createContentBlob: (emailOrPdfBlob, filename?: string) =>
@@ -75,11 +82,24 @@ const NewRequestsPage = () => {
         </RequestGeneratorProvider>
     );
 };
+const ReactorPage = () => {
+    const mailtoDropdown = useMailtoDropdownProps();
+    return (
+        <>
+            {window.PARAMETERS.reference && (
+                <Reactor reference={window.PARAMETERS.reference} pageOptions={{ mailtoDropdown }} />
+            )}
+        </>
+    );
+};
 
 const pages = (setPage: SetDesktopAppPageFunction) => ({
     newRequests: {
         title: t_a('new-requests', 'app'),
         component: <NewRequestsPage />,
+    },
+    reactor: {
+        component: <ReactorPage />,
     },
     proceedings: {
         title: t_a('proceedings', 'app'),
@@ -95,7 +115,7 @@ const pages = (setPage: SetDesktopAppPageFunction) => ({
 });
 
 export type DesktopAppPageId = keyof ReturnType<typeof pages>;
-export type SetDesktopAppPageFunction = (newPage: DesktopAppPageId) => void;
+export type SetDesktopAppPageFunction = (newPage: DesktopAppPageId, params?: Record<string, string>) => void;
 
 const DesktopApp = () => {
     const [showTutorial, useOfflineSearch] = useAppSettingsStore((state) => [
@@ -108,11 +128,17 @@ const DesktopApp = () => {
     // TODO: Allow specifying an actual from email.
 
     const { Wizard, set, pageId } = useWizard(pages(setPage), {
-        initialPageId: 'newRequests',
+        initialPageId: (window.PARAMETERS.page as DesktopAppPageId) || 'newRequests',
     });
 
-    function setPage(new_page: DesktopAppPageId) {
-        set(new_page);
+    function setPage(newPage: DesktopAppPageId, params?: Record<string, string>) {
+        // TODO: Wizard *really* isn't meant to be a router. :| We should replace this with a proper router soon.
+        if (params) {
+            window.location.hash = `!page=${newPage}${Object.entries(params || {})
+                .map(([k, v]) => `&${k}=${v}`)
+                .join('')}`;
+            setTimeout(() => window.location.reload(), 0);
+        } else set(newPage);
     }
     window.setPage = setPage;
     window.preact.onSetPage(setPage);
