@@ -56,6 +56,7 @@
     localforage "^1.7.1"
     minisearch "^5.0.0"
     pdfkit "^0.12.1"
+    postal-mime "^1.0.13"
     prop-types "^15.7.2"
     qrcode "^1.4.4"
     react-instantsearch-dom "^6.26.0"
@@ -4881,6 +4882,11 @@ pngjs@^5.0.0:
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/pngjs/-/pngjs-5.0.0.tgz#e79dd2b215767fd9c04561c01236df960bce7fbb"
   integrity sha512-40QW5YalBNfQo5yRYmiw7Yz6TKKVr3h6970B2YE+3fQpsWcrbj1PzJgxeJ19DRQjhMbKPIuMY8rFaXc8moolVw==
+
+postal-mime@^1.0.13:
+  version "1.0.13"
+  resolved "https://registry.yarnpkg.com/postal-mime/-/postal-mime-1.0.13.tgz#d544054dc6105edbe89cf6ca76694623c349ffd4"
+  integrity sha512-1Hlt8d5Kg8NxkmrZJMi31O41JI5ejs4PKYLp39i0N+gpI7ljPsVXslovGHN/GfBaVqgnpf9YRk+htXf+EDVFVw==
 
 postcss-value-parser@^4.2.0:
   version "4.2.0"

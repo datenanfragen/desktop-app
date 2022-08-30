@@ -5,7 +5,7 @@ import type {
     RecreateEmailClientsReturn,
     GetMessageOptions,
     GetMessageResult,
-} from '../../electron/email';
+} from '../../../electron/email';
 
 declare global {
     interface Window {
@@ -16,6 +16,8 @@ declare global {
             sendMessage: (options: SendMessageOptions) => SendMessageReturn;
             getFolders: () => Promise<string[]>;
             getMessages: (options: GetMessageOptions) => Promise<GetMessageResult[]>;
+            downloadMessage: (folder: string, seq: number) => Promise<ArrayBuffer>;
+            htmlToPdf: (html: string, title?: string, address?: string) => Promise<Blob>;
         };
     }
 }

@@ -12,5 +12,9 @@ contextBridge.exposeInMainWorld('email', {
     sendMessage: (options) => ipcRenderer.invoke('email:sendMessage', options),
     getFolders: () => ipcRenderer.invoke('email:getFolders'),
     getMessages: (options) => ipcRenderer.invoke('email:getMessages', options),
+    downloadMessage: (folder, seq) =>
+        ipcRenderer.invoke('email:downloadMessage', folder, seq).then((res) => res.buffer),
+    htmlToPdf: (html, title, address) =>
+        ipcRenderer.invoke('email:htmlToPdf', html, title, address).then((res) => new Blob([res.buffer])),
 });
 /* eslint-enable @typescript-eslint/no-var-requires */

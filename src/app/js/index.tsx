@@ -1,4 +1,5 @@
 import { render } from 'preact';
+import { useMemo } from 'preact/hooks';
 import {
     RequestGeneratorProvider,
     createGeneratorStore,
@@ -11,6 +12,10 @@ import {
     ProceedingsList,
     miniSearchClient,
     useCacheStore,
+    mail2pdf,
+    BlobStorage,
+    flash,
+    FlashMessage,
 } from '@datenanfragen/components';
 import { useAppSettingsStore } from './store/settings';
 import { SetupTutorial } from './setup-tutorial';
@@ -19,16 +24,22 @@ import { Settings } from './settings';
 const NewRequestsPage = () => {
     const [fromEmail, useOfflineSearch] = useAppSettingsStore((state) => [state.smtpUser, state.useOfflineSearch]);
     const miniSearch = useCacheStore((state) => state.miniSearch);
+    const blobStorage = useMemo(() => new BlobStorage(), []);
 
     const sendMail =
         fromEmail === ''
             ? undefined
-            : (data: EmailData) => {
-                  window.email.sendMessage({ ...data, from: fromEmail }).then((info) => {
-                      console.log(info);
-                      return info;
-                  });
-              };
+            : (data: EmailData) =>
+                  window.email
+                      .sendMessage({ ...data, from: fromEmail })
+                      .then((info) => {
+                          flash(<FlashMessage type="success">{t_a('send-email-success', 'generator')}</FlashMessage>);
+                          return { content: info.content.buffer, messageId: info.messageId };
+                      })
+                      .catch((e) => {
+                          console.error(e);
+                          flash(<FlashMessage type="error">{t_a('send-email-error', 'generator')}</FlashMessage>);
+                      });
 
     return (
         <RequestGeneratorProvider createStore={createGeneratorStore}>
@@ -46,6 +57,18 @@ const NewRequestsPage = () => {
                         },
                     },
                     searchClient: useOfflineSearch ? (params) => miniSearchClient(miniSearch, params) : undefined,
+                    actionButton: {
+                        createContentBlob: (emailOrPdfBlob, filename?: string) =>
+                            (emailOrPdfBlob instanceof ArrayBuffer
+                                ? mail2pdf(emailOrPdfBlob)
+                                : new Promise<Blob>((resolve) => resolve(emailOrPdfBlob))
+                            )
+                                .then((pdfBlob) => {
+                                    const uuid = crypto.randomUUID();
+                                    return blobStorage.setBlob('proceeding-files', uuid, pdfBlob);
+                                })
+                                .then((uuid) => ({ blobId: uuid, filename: filename || uuid + '.pdf' })),
+                    },
                 }}
             />
         </RequestGeneratorProvider>
@@ -93,7 +116,7 @@ const DesktopApp = () => {
         <SetupTutorial />
     ) : (
         <>
-            <AppMenu setPage={setPage} activePage={pageId} />
+            <AppMenu setPage={setPage} activePage={pageId || 'newRequests'} />
             {useOfflineSearch && new Date(offlineDataDate) < new Date(Date.now() - 1000 * 60 * 60 * 24 * 14) && (
                 <div class="box box-warning" style="margin-bottom: 20px;">
                     {t_a('offline-data-outdated', 'settings')}

@@ -29,6 +29,8 @@ const createWindow = () => {
     win.loadFile(join(__dirname, '..', '..', 'parcel_dist', 'app', 'index.html'));
 
     if (!app.isPackaged) win.webContents.openDevTools();
+
+    return win;
 };
 
 app.enableSandbox();
@@ -52,14 +54,14 @@ app.whenReady().then(() => {
                     `default-src 'self'; script-src 'self'; connect-src 'self'${
                         // Parcel uses `ws://localhost:1234` for HMR.
                         app.isPackaged ? '' : ' ws://localhost:1234 http://localhost:1314'
-                    } ${dade_origins} https://static.dacdn.de https://search.datenanfragen.de; font-src 'self' data:; worker-src blob:; img-src 'self' data:;`,
+                    } ${dade_origins} https://static.dacdn.de https://search.datenanfragen.de blob:; font-src 'self' data:; worker-src blob:; img-src 'self' data:; style-src 'self' 'unsafe-inline';`,
                 ],
             },
         })
     );
 
-    setupIpc();
-    createWindow();
+    const win = createWindow();
+    setupIpc(win);
 
     // OS-specific behaviour.
     app.on('window-all-closed', () => {
