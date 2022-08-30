@@ -1,9 +1,10 @@
-import { ImapFlow, ImapFlowOptions } from 'imapflow';
+import { ImapFlow, ImapFlowOptions, Readable } from 'imapflow';
 import { getPassword } from 'keytar';
 import nodemailer from 'nodemailer';
 import Mail from 'nodemailer/lib/mailer/index';
 import MailComposer from 'nodemailer/lib/mail-composer';
 import type SMTPTransport from 'nodemailer/lib/smtp-transport';
+import { BrowserWindow } from 'electron';
 
 const clients: {
     imapOptions: ImapFlowOptions | undefined;
@@ -117,31 +118,93 @@ export const getMessages = (options: GetMessageOptions): Promise<GetMessageResul
             .finally(() => imapClient.logout())
     );
 
+export const downloadMessage = (folder: string, seq: number): Promise<Readable> =>
+    getImapConnection().then((imapClient) =>
+        imapClient
+            .getMailboxLock(folder)
+            .then(async (lock) => {
+                console.log('lock acquired');
+                try {
+                    return imapClient.download('' + seq).then((download) => download.content);
+                } finally {
+                    lock.release();
+                }
+            })
+            .finally(() => imapClient.logout())
+    );
+
+export const htmlToPdf = (html: string, title?: string, address?: string) => {
+    const pdfWindow = new BrowserWindow({
+        width: 1000,
+        show: false,
+
+        webPreferences: {
+            // Explicitly set security preferences to their (secure) defaults, just in case.
+            nodeIntegration: false,
+            nodeIntegrationInWorker: false,
+            nodeIntegrationInSubFrames: false,
+            sandbox: true,
+            webSecurity: true,
+            allowRunningInsecureContent: false,
+            experimentalFeatures: false,
+            contextIsolation: true,
+            webviewTag: false,
+            navigateOnDragDrop: false,
+        },
+    });
+    pdfWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
+    return new Promise<Buffer>((resolve, reject) =>
+        pdfWindow.webContents.on('did-finish-load', () =>
+            resolve(
+                pdfWindow.webContents
+                    .printToPDF({
+                        pageSize: 'A4',
+                        marginsType: 0,
+                        headerFooter:
+                            title && address
+                                ? {
+                                      title,
+                                      url: address,
+                                  }
+                                : undefined,
+                        printSelectionOnly: false,
+                        printBackground: true,
+                    })
+                    .finally(() => pdfWindow.close())
+            )
+        )
+    );
+};
+
 export type SendMessageOptions = { from: string; to: string; subject: string; text: string };
-export type SendMessageReturn = Promise<{ accepted: string[]; rejected: string[] }>;
+export type SendMessageReturn = Promise<{
+    accepted: string[];
+    rejected: string[];
+    messageId: string;
+    content: Buffer;
+}>;
 export const sendEmail = async (options: SendMessageOptions): SendMessageReturn => {
     return nodemailer
         .createTransport(clients.smtpOptions)
         .sendMail(options)
-        .then((info) => {
-            console.log(info);
-            new MailComposer({ ...options, headers: { 'Message-ID': info.messageId } })
+        .then(async (info) => {
+            const sentEmailContent = await new MailComposer({ ...options, headers: { 'Message-ID': info.messageId } })
                 .compile()
-                .build()
-                .then((sentEmailContent) =>
-                    getImapConnection().then((imapClient) =>
-                        getSentFolder(imapClient)
-                            .then((sentFolder) => {
-                                if (sentFolder) return imapClient.append(sentFolder, sentEmailContent, ['\\Seen']);
-                            })
-                            .finally(() => imapClient.logout())
-                    )
-                );
+                .build();
+
+            await getImapConnection().then((imapClient) =>
+                getSentFolder(imapClient)
+                    .then((sentFolder) => {
+                        if (sentFolder) return imapClient.append(sentFolder, sentEmailContent, ['\\Seen']);
+                    })
+                    .finally(() => imapClient.logout())
+            );
 
             return {
                 accepted: info.accepted.map(stringOrNodeMailerAddressToString),
                 rejected: info.rejected.map(stringOrNodeMailerAddressToString),
                 messageId: info.messageId,
+                content: Buffer.from(sentEmailContent.toString('base64'), 'base64'),
             };
         });
 };

@@ -9,6 +9,7 @@ import {
 } from '@datenanfragen/components';
 import { useAppSettingsStore } from './store/settings';
 
+useAppStore.getState().setPreference('saveRequestContent', true);
 setupWindow({ supported_languages: { en: undefined, de: undefined }, locale: useAppStore.getState().savedLocale });
 setupWindowForApp(useAppStore.getState().savedLocale);
 if (process.env.NODE_ENV === 'development')

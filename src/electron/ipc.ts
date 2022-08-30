@@ -1,4 +1,4 @@
-import { ipcMain, shell } from 'electron';
+import { BrowserWindow, ipcMain, shell } from 'electron';
 import * as keytar from 'keytar';
 import {
     sendEmail,
@@ -12,10 +12,12 @@ import {
     GetMessageOptions,
     getMessages,
     GetMessageResult,
+    downloadMessage,
+    htmlToPdf,
 } from './email';
 
 const isValidProtocol = (protocol: string): protocol is 'imap' | 'smtp' => ['imap', 'smtp'].includes(protocol);
-export const setupIpc = () => {
+export const setupIpc = (win: BrowserWindow) => {
     ipcMain.handle(
         'email:recreateEmailClients',
         (_, options: RecreateEmailClientsOptions): RecreateEmailClientsReturn => recreateEmailClients(options)
@@ -33,6 +35,23 @@ export const setupIpc = () => {
         'email:getMessages',
         (_, options: GetMessageOptions): Promise<GetMessageResult[]> => getMessages(options)
     );
+    ipcMain.handle(
+        'email:downloadMessage',
+        (_, folder: string, seq: number): Promise<Buffer> =>
+            downloadMessage(folder, seq).then((stream) =>
+                new Promise<Buffer>((resolve, reject) => {
+                    if (!stream) reject();
+                    const buffers: Buffer[] = [];
+                    console.log('download started');
+
+                    stream.on('data', (data) => buffers.push(Buffer.from(data)));
+                    stream.on('error', (err) => reject(err));
+                    stream.on('end', () => resolve(Buffer.concat(buffers)));
+                }).then((buf) => Buffer.from(buf.toString('base64'), 'base64'))
+            )
+    );
+
+    ipcMain.handle('email:htmlToPdf', (_, html: string, title?: string): Promise<Buffer> => htmlToPdf(html, title));
 
     ipcMain.handle('email:openMailto', (_, options: SendMessageOptions) =>
         shell.openExternal(
