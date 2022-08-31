@@ -66,6 +66,7 @@ app.whenReady().then(() => {
     );
 
     setupIpc();
+    createWindow();
 
     // OS-specific behaviour.
     app.on('window-all-closed', () => {
