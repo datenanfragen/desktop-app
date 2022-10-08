@@ -1,6 +1,8 @@
 import { join } from 'path';
 import { app, BrowserWindow, session, shell } from 'electron';
 import { setupIpc } from './ipc';
+import { setMenu } from './menu';
+import { legalBaseUrlHostnames, legalBaseUrls } from './consts';
 
 const createWindow = () => {
     const win = new BrowserWindow({
@@ -25,6 +27,7 @@ const createWindow = () => {
             navigateOnDragDrop: false,
         },
     });
+    setMenu();
 
     win.loadFile(join(__dirname, '..', '..', 'parcel_dist', 'app', 'index.html'));
 
@@ -44,8 +47,6 @@ app.whenReady().then(() => {
 
     // Set a secure CSP for every request.
     // TODO: Make it possible to completely disable requests to us.
-    const dade_origins =
-        'https://www.datenanfragen.de https://www.datarequests.org https://www.demandetesdonnees.fr https://www.pedidodedados.org https://www.solicituddedatos.es https://www.osobnipodaci.org https://www.gegevensaanvragen.nl';
     session.defaultSession.webRequest.onHeadersReceived((details, callback) =>
         callback({
             responseHeaders: {
@@ -54,14 +55,18 @@ app.whenReady().then(() => {
                     `default-src 'self'; script-src 'self'; connect-src 'self'${
                         // Parcel uses `ws://localhost:1234` for HMR.
                         app.isPackaged ? '' : ' ws://localhost:1234 http://localhost:1314'
-                    } ${dade_origins} https://static.dacdn.de https://search.datenanfragen.de blob:; font-src 'self' data:; worker-src blob:; img-src 'self' data:; style-src 'self' 'unsafe-inline';`,
+                    } ${legalBaseUrls
+                        .map((u) => u.substring(0, -1))
+                        .join(
+                            ' '
+                        )} https://static.dacdn.de https://search.datenanfragen.de blob:; font-src 'self' data:; worker-src blob:; img-src 'self' data:; style-src 'self' 'unsafe-inline';`,
                 ],
             },
         })
     );
 
-    const win = createWindow();
-    setupIpc(win);
+    setupIpc();
+    createWindow();
 
     // OS-specific behaviour.
     app.on('window-all-closed', () => {
@@ -76,10 +81,15 @@ app.on('web-contents-created', (event, contents) => {
     // Disable navigation to remote sites.
     contents.on('will-navigate', (event, navigationUrl) => {
         const parsedUrl = new URL(navigationUrl);
-        if (parsedUrl.protocol !== 'file:') {
-            console.log('Blocking navigation to', parsedUrl);
-            event.preventDefault();
-        }
+        // Allow file: navigation.
+        if (parsedUrl.protocol === 'file:') return;
+        // Open links to our domains in the browser. Important: We still need to `preventDefault()` below!
+        else if (parsedUrl.protocol === 'https:' && legalBaseUrlHostnames.includes(parsedUrl.hostname))
+            shell.openExternal(parsedUrl.toString());
+        // Everything else gets outright blocked.
+        else console.log('Blocking navigation to', parsedUrl);
+
+        event.preventDefault();
     });
 
     // Disable opening additional windows.

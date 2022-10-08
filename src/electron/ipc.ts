@@ -1,5 +1,6 @@
-import { BrowserWindow, ipcMain, shell } from 'electron';
+import { ipcMain, shell } from 'electron';
 import * as keytar from 'keytar';
+import { legalBaseUrls, LegalBaseUrl } from './consts';
 import {
     sendEmail,
     getFolders,
@@ -15,9 +16,14 @@ import {
     downloadMessage,
     htmlToPdf,
 } from './email';
+import { setMenu } from './menu';
 
 const isValidProtocol = (protocol: string): protocol is 'imap' | 'smtp' => ['imap', 'smtp'].includes(protocol);
-export const setupIpc = (win: BrowserWindow) => {
+export const setupIpc = () => {
+    ipcMain.handle('app:setBaseUrl', (_, baseUrl: LegalBaseUrl) => {
+        if (legalBaseUrls.includes(baseUrl)) setMenu(baseUrl);
+    });
+
     ipcMain.handle(
         'email:recreateEmailClients',
         (_, options: RecreateEmailClientsOptions): RecreateEmailClientsReturn => recreateEmailClients(options)

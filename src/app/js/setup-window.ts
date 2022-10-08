@@ -14,6 +14,7 @@ setupWindow({ supported_languages: { en: undefined, de: undefined }, locale: use
 setupWindowForApp(useAppStore.getState().savedLocale);
 if (process.env.NODE_ENV === 'development')
     (window as typeof window & { BASE_URL: string }).BASE_URL = 'http://localhost:1314/';
+window.app.setBaseUrl(window.BASE_URL);
 
 window.ON_PROCEEDING_STATUS_CHANGE = (proceeding) => {
     if (!useAppSettingsStore.getState().receiveNotifications) return;
